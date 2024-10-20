@@ -58,7 +58,7 @@ Durée approximative des boucles en millisecondes :
     Minimum = 0ms, Maximum = 0ms, Moyenne = 0ms
 
 
-**1. Accès internet routeur**
+__**1. Accès internet routeur**__
 
 **☀️ Déjà, prouvez que le routeur a un accès internet**
 
@@ -73,5 +73,64 @@ sudo firewall-cmd --add-masquerade --permanent
 success
 sudo firewall-cmd --reload
 success
+
+__**2. Accès internet clients**__
+
+**☀️ Prouvez que les clients ont un accès internet**
+client 1 
+ping ynov.com
+PING ynov.com (172.67.74.226) 56(84) bytes of data.
+64 bytes from 172.67.74.226: icmp_seq=1 ttl=254 time=15.6 ms
+64 bytes from 172.67.74.226: icmp_seq=2 ttl=254 time=16.0 ms
+64 bytes from 172.67.74.226: icmp_seq=3 ttl=254 time=18.2 ms
+64 bytes from 172.67.74.226: icmp_seq=4 ttl=254 time=15.6 ms
+^C
+--- ynov.com ping statistics ---
+4 packets transmitted, 4 received, 0% packet loss, time 3011ms
+rtt min/avg/max/mdev = 15.629/16.374/18.246/1.089 ms
+
+client 2
+ping ynov.com
+PING ynov.com (104.26.10.233) 56(84) bytes of data.
+64 bytes from 104.26.10.233: icmp_seq=1 ttl=254 time=16.2 ms
+64 bytes from 104.26.10.233: icmp_seq=2 ttl=254 time=18.6 ms
+^C
+--- ynov.com ping statistics ---
+3 packets transmitted, 2 received, 33.3333% packet loss, time 2005ms
+rtt min/avg/max/mdev = 16.187/17.379/18.571/1.192 ms
+
+**☀️ Montrez-moi le contenu final du fichier de configuration de l'interface réseau**
+ 
+  [1/1]                                             /etc/netplan/01-netcfg.yaml                                                       network:
+  version: 2
+  renderer: networkd
+  ethernets:
+    enp0s8:
+      dhcp4: no
+      addresses: [10.5.1.12/24]
+      gateway4: 10.5.1.254
+      nameservers:
+        addresses: [1.1.1.1]
+
+**__III. Serveur SSH__**
+
+**☀️ Sur routeur.tp5.b1, déterminer sur quel port écoute le serveur SSH**
+
+[mrtrynity@vbox ~]$ sudo ss -lnpt | grep 22
+LISTEN 0      128          0.0.0.0:22        0.0.0.0:*    users:(("sshd",pid=758,fd=3))
+LISTEN 0      128             [::]:22           [::]:*    users:(("sshd",pid=758,fd=4))
+
+**☀️ Sur routeur.tp5.b1, vérifier que ce port est bien ouvert**
+
+public (active)
+  target: default
+  icmp-block-inversion: no
+  interfaces: enp0s3 enp0s8
+  sources:
+  services: cockpit dhcpv6-client ssh
+
+__**IV. Serveur DHCP**__
+
+
 
 
